@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"> 
-    <title>library management system 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <title>Library Management System 2026</title>
+    <link rel="icon" href="images/Library_Management_System.jpg" type="image/x-icon">
 </head>
-
-
-
- <!-- Navigation Area -->
-  
 <body class="page-dashboard">
 
     <!-- LEFT PART: Sidebar -->
@@ -46,27 +42,33 @@
         </nav>
     </aside>
 
-  <!-- Hero Section -->
-   <section>
-<h1>Library Management System 2026</h1> 
+    <!-- RIGHT PART: Main content -->
+    <main class="main">
+        <h1>Search Books</h1>
+        <input class="search-box" id="q" type="search" placeholder="Title, author, ISBN or category">
+        <div id="list"></div>
+    </main>
 
-
-
-   </section>
-
-
-
-
-   <body>
-
-
-
-
-
-
-
-
-</body>
- 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+    <script src="db.js"></script>
+    <script>
+        async function search() {
+            const q = document.getElementById("q").value.trim().replace(/[,()]/g, "");
+            // ilike = "contains", ignoring capital letters
+            const { data: books } = await db.from("books").select("*")
+                .or(`title.ilike.%${q}%,author.ilike.%${q}%,isbn.ilike.%${q}%,category.ilike.%${q}%`).order("title");
+            let html = "";
+            for (const b of books) {
+                html += `<div class="box panel" style="margin-bottom:12px"><strong>${safe(b.title)}</strong><br>${safe(b.author)}
+                    ${b.category ? " - " + safe(b.category) : ""}<br>
+                    <span style="color:${b.member_id ? "var(--danger)" : "var(--text-muted)"}">${b.member_id ? "Borrowed" : "Available"}</span></div>`;
+            }
+            document.getElementById("list").innerHTML = html || "<p>No books found.</p>";
+        }
+        document.getElementById("q").addEventListener("input", search);
+        // the dashboard search box sends the word here as ?q=word
+        document.getElementById("q").value = new URLSearchParams(location.search).get("q") || "";
+        search();
+    </script>
 </body>
 </html>

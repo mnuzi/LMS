@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"> 
-    <title>library management system 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <title>Library Management System 2026</title>
+    <link rel="icon" href="images/Library_Management_System.jpg" type="image/x-icon">
 </head>
-
-
-
- <!-- Navigation Area -->
-  
 <body class="page-dashboard">
 
     <!-- LEFT PART: Sidebar -->
@@ -46,27 +42,36 @@
         </nav>
     </aside>
 
-  <!-- Hero Section -->
-   <section>
-<h1>Library Management System 2026</h1> 
+    <!-- RIGHT PART: Main content -->
+    <main class="main">
+        <h1>Remove Book</h1>
+        <div id="list"></div>
+    </main>
 
-
-
-   </section>
-
-
-
-
-   <body>
-
-
-
-
-
-
-
-
-</body>
- 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+    <script src="db.js"></script>
+    <script>
+        async function loadBooks() {
+            // get every book from the "books" table
+            const { data: books, error } = await db.from("books").select("*").order("title");
+            if (error) { alert(error.message); return; }
+            let html = "";
+            for (const b of books) {
+                // a borrowed book cannot be removed
+                const disabled = b.member_id ? "disabled" : "";
+                html += `<div class="box panel list-row" style="margin-bottom:12px">
+                    <span><strong>${safe(b.title)}</strong><br>${safe(b.author)}</span>
+                    <button class="btn" ${disabled} onclick="removeBook('${b.id}')">Remove</button></div>`;
+            }
+            document.getElementById("list").innerHTML = html || "<p>No books in the library.</p>";
+        }
+        async function removeBook(id) {
+            if (!confirm("Remove this book?")) return;
+            const { error } = await db.from("books").delete().eq("id", id);
+            if (error) alert(error.message);
+            loadBooks();
+        }
+        loadBooks();
+    </script>
 </body>
 </html>

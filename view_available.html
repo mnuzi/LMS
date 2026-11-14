@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"> 
-    <title>library management system 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <title>Library Management System 2026</title>
+    <link rel="icon" href="images/Library_Management_System.jpg" type="image/x-icon">
 </head>
-
-
-
- <!-- Navigation Area -->
-  
 <body class="page-dashboard">
 
     <!-- LEFT PART: Sidebar -->
@@ -45,27 +41,42 @@
             </a>
         </nav>
     </aside>
-  <!-- Hero Section -->
-   <section>
-<h1>Library Management System 2026</h1> 
 
+    <!-- RIGHT PART: Main content -->
+    <main class="main">
+        <h1>Available Books</h1>
+        <div id="list"></div>
+    </main>
 
-
-   </section>
-
-
-
-
-   <body>
-
-
-
-
-
-
-
-
-</body>
- 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+    <script src="db.js"></script>
+    <script>
+        async function loadAvailable() {
+            // books where member_id is empty (null) are available
+            const { data: books } = await db.from("books").select("*").is("member_id", null).order("title");
+            const { data: members } = await db.from("members").select("*").order("name");
+            // build the drop-down list of members
+            let options = '<option value="">Choose member</option>';
+            for (const m of members) options += `<option value="${m.id}">${safe(m.name)}</option>`;
+            let html = "";
+            for (const b of books) {
+                html += `<div class="box panel list-row" style="margin-bottom:12px">
+                    <span><strong>${safe(b.title)}</strong><br>${safe(b.author)}</span>
+                    <span><select class="search-box" id="m-${b.id}" style="width:200px">${options}</select>
+                    <button class="btn" onclick="borrowBook('${b.id}')">Borrow</button></span></div>`;
+            }
+            document.getElementById("list").innerHTML = html || "<p>No books are available.</p>";
+        }
+        async function borrowBook(id) {
+            const memberId = document.getElementById("m-" + id).value;
+            if (!memberId) { alert("Choose a member first"); return; }
+            // due in 14 days
+            const due = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+            const { error } = await db.from("books").update({ member_id: memberId, due_date: due }).eq("id", id);
+            if (error) alert(error.message); else alert("Borrowed. Due on " + due);
+            loadAvailable();
+        }
+        loadAvailable();
+    </script>
 </body>
 </html>

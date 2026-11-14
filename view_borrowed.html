@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"> 
-    <title>library management system 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <title>Library Management System 2026</title>
+    <link rel="icon" href="images/Library_Management_System.jpg" type="image/x-icon">
 </head>
-
-
-
- <!-- Navigation Area -->
-  
 <body class="page-dashboard">
 
     <!-- LEFT PART: Sidebar -->
@@ -45,27 +41,37 @@
             </a>
         </nav>
     </aside>
-  <!-- Hero Section -->
-   <section>
-<h1>Library Management System 2026</h1> 
 
+    <!-- RIGHT PART: Main content -->
+    <main class="main">
+        <h1>View Borrowed Books</h1>
+        <div id="list"></div>
+    </main>
 
-
-   </section>
-
-
-
-
-   <body>
-
-
-
-
-
-
-
-
-</body>
- 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+    <script src="db.js"></script>
+    <script>
+        async function loadBorrowed() {
+            // "members(name)" joins the members table to get the borrower's name
+            const { data: books } = await db.from("books").select("*, members(name)").not("member_id", "is", null).order("due_date");
+            const today = new Date().toISOString().slice(0, 10);
+            let html = "";
+            for (const b of books) {
+                const late = b.due_date < today;
+                html += `<div class="box panel list-row" style="margin-bottom:12px">
+                    <span><strong>${safe(b.title)}</strong><br>Borrowed by ${safe(b.members.name)}<br>
+                    <span style="color:${late ? "var(--danger)" : "var(--text-muted)"}">${late ? "Overdue since " : "Due "}${b.due_date}</span></span>
+                    <button class="btn" onclick="returnBook('${b.id}')">Mark returned</button></div>`;
+            }
+            document.getElementById("list").innerHTML = html || "<p>No books are borrowed.</p>";
+        }
+        async function returnBook(id) {
+            // clearing member_id makes the book available again
+            const { error } = await db.from("books").update({ member_id: null, due_date: null }).eq("id", id);
+            if (error) alert(error.message);
+            loadBorrowed();
+        }
+        loadBorrowed();
+    </script>
 </body>
 </html>

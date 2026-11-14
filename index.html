@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Library Management System 2026</title>
+    <link rel="icon" href="images/Library_Management_System.jpg" type="image/x-icon">
 </head>
-<body class="page-dashboard">
+<body >
 
     <!-- LEFT PART: Sidebar -->
     <aside class="sidebar">
@@ -53,28 +54,28 @@
                     <span class="sep">·</span>
                     <span id="current-time"></span>
                     <span class="sep">·</span>
-                    <span class="overdue"><span id="overdue-count">47</span> books are overdue</span>
+                    <span class="overdue"><span id="overdue-count">0</span> books are overdue</span>
                 </p>
             </div>
-            <input class="search-box" type="search" placeholder="Find a book or member…">
+            <input class="search-box" id="top-search" type="search" placeholder="Find a book or member…">
         </header>
 
         <!-- Row 1: 4 stat boxes -->
         <section class="stats-grid">
             <div class="box stat-box">
-                <div class="stat-value"></div>
+                <div class="stat-value" id="stat-total"></div>
                 <div class="stat-label">Total books</div>
             </div>
             <div class="box stat-box">
-                <div class="stat-value"></div>
+                <div class="stat-value" id="stat-available"></div>
                 <div class="stat-label">Available</div>
             </div>
             <div class="box stat-box">
-                <div class="stat-value"></div>
+                <div class="stat-value" id="stat-loan"></div>
                 <div class="stat-label">On loan</div>
             </div>
             <div class="box stat-box">
-                <div class="stat-value"></div>
+                <div class="stat-value" id="stat-members"></div>
                 <div class="stat-label">Members</div>
             </div>
         </section>
@@ -82,19 +83,20 @@
         <!-- Row 2: New arrivals (full width) -->
         <section class="box panel">
             <h2>New arrivals</h2>
-            <div class="panel-body arrivals-row"></div>
+            <div class="panel-body arrivals-row" id="arrivals"></div>
         </section>
 
         <!-- Row 3: two boxes -->
         <section class="bottom-grid">
             <div class="box panel">
                 <h2>Recent circulation</h2>
-                <div class="panel-body"></div>
+                <div class="panel-body" id="borrowed-list"></div>
             </div>
             <div class="box panel">
-                <h2>Most loved this month</h2>
-                <div class="panel-body"></div>
+                <h2>Overdue books</h2>
+                <div class="panel-body" id="overdue-list"></div>
             </div>
+            
         </section>
 
     </main>
@@ -115,5 +117,38 @@
         setInterval(updateClock, 1000);
     </script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+    <script src="db.js"></script>
+    <script>
+        async function loadDashboard() {
+            const { data: books } = await db.from("books").select("*, members(name)").order("created_at", { ascending: false });
+            const { count: memberCount } = await db.from("members").select("*", { count: "exact", head: true });
+            const today = new Date().toISOString().slice(0, 10);
+            const borrowed = books.filter(b => b.member_id);
+            const overdue = borrowed.filter(b => b.due_date < today);
+
+            // the four stat boxes
+            document.getElementById("stat-total").textContent = books.length;
+            document.getElementById("stat-available").textContent = books.length - borrowed.length;
+            document.getElementById("stat-loan").textContent = borrowed.length;
+            document.getElementById("stat-members").textContent = memberCount;
+            document.getElementById("overdue-count").textContent = overdue.length;
+
+            // newest 6 books
+            document.getElementById("arrivals").innerHTML = books.slice(0, 6).map(b =>
+                `<div class="box panel" style="min-width:150px"><strong>${safe(b.title)}</strong><br>${safe(b.author)}</div>`).join("") || "<p>No books yet.</p>";
+            // currently borrowed books
+            document.getElementById("borrowed-list").innerHTML = borrowed.slice(0, 6).map(b =>
+                `<p>${safe(b.title)} - ${safe(b.members.name)} (due ${b.due_date})</p>`).join("") || "<p>No books on loan.</p>";
+            document.getElementById("overdue-list").innerHTML = overdue.map(b =>
+                `<p style="color:var(--danger)">${safe(b.title)}</p>`).join("") || "<p>Nothing overdue.</p>";
+        }
+        loadDashboard();
+
+        // pressing Enter in the top search box opens the search page
+        document.getElementById("top-search").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") location.href = "search_books.html?q=" + encodeURIComponent(this.value);
+        });
+    </script>
 </body>
 </html>

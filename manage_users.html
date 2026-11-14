@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"> 
-    <title>library management system 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <title>Library Management System 2026</title>
+    <link rel="icon" href="images/Library_Management_System.jpg" type="image/x-icon">
 </head>
-
-
-
- <!-- Navigation Area -->
-  
 <body class="page-dashboard">
 
     <!-- LEFT PART: Sidebar -->
@@ -46,27 +42,48 @@
         </nav>
     </aside>
 
-  <!-- Hero Section -->
-   <section>
-<h1>Library Management System 2026</h1> 
+    <!-- RIGHT PART: Main content -->
+    <main class="main">
+        <h1>Manage User Accounts</h1>
+        <form id="form" class="box panel form">
+            <input class="search-box" name="name" placeholder="Full name" required>
+            <input class="search-box" name="email" placeholder="Email" type=email>
+            <input class="search-box" name="phone" placeholder="Phone" type=tel>
+            <button class="btn">Add member</button>
+        </form>
+        <div id="list"></div>
+    </main>
 
-
-
-   </section>
-
-
-
-
-   <body>
-
-
-
-
-
-
-
-
-</body>
- 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+    <script src="db.js"></script>
+    <script>
+        async function loadMembers() {
+            const { data: members } = await db.from("members").select("*").order("name");
+            let html = "";
+            for (const m of members) {
+                html += `<div class="box panel list-row" style="margin-bottom:12px">
+                    <span><strong>${safe(m.name)}</strong><br>${safe(m.email)} ${safe(m.phone)}</span>
+                    <button class="btn" onclick="removeMember('${m.id}')">Remove</button></div>`;
+            }
+            document.getElementById("list").innerHTML = html || "<p>No members yet.</p>";
+        }
+        async function removeMember(id) {
+            // do not remove a member who still has books
+            const { count } = await db.from("books").select("*", { count: "exact", head: true }).eq("member_id", id);
+            if (count > 0) { alert("This member still has borrowed books."); return; }
+            if (!confirm("Remove this member?")) return;
+            await db.from("members").delete().eq("id", id);
+            loadMembers();
+        }
+        document.getElementById("form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const f = this.elements;
+            const { error } = await db.from("members").insert({ name: f.name.value, email: f.email.value, phone: f.phone.value });
+            if (error) { alert(error.message); return; }
+            this.reset();
+            loadMembers();
+        });
+        loadMembers();
+    </script>
 </body>
 </html>

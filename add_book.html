@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css"> 
-    <title>library management system 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <title>Library Management System 2026</title>
+    <link rel="icon" href="images/Library_Management_System.jpg" type="image/x-icon">
 </head>
-
-
-
- <!-- Navigation Area -->
- <!-- LEFT PART: Sidebar -->
 <body class="page-dashboard">
 
     <!-- LEFT PART: Sidebar -->
@@ -46,27 +42,34 @@
         </nav>
     </aside>
 
-  <!-- Add Books Hero Section -->
-   <section>
-<h1>Add New Books Library </h1> 
+    <!-- RIGHT PART: Main content -->
+    <main class="main">
+        <h1>Add New Books Library</h1>
+        <form id="form" class="box panel form">
+            <input class="search-box" name="title" placeholder="Title" required>
+            <input class="search-box" name="author" placeholder="Author" required>
+            <input class="search-box" name="isbn" placeholder="ISBN">
+            <input class="search-box" name="category" placeholder="Category (e.g. Fiction)">
+            <button class="btn">Add book</button>
+        </form>
+    </main>
 
-
-
-   </section>
-
-
-
-
-   <body>
-
-
-
-
-
-
-
-
-</body>
- 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+    <script src="db.js"></script>
+    <script>
+        // Runs when the form is submitted
+        document.getElementById("form").addEventListener("submit", async function (e) {
+            e.preventDefault();                       // stop the page from reloading
+            const f = this.elements;
+            // insert a new row into the "books" table
+            const { error } = await db.from("books").insert({
+                title: f.title.value, author: f.author.value,
+                isbn: f.isbn.value, category: f.category.value
+            });
+            if (error) { alert(error.message); return; }
+            alert("Book added!");
+            this.reset();
+        });
+    </script>
 </body>
 </html>
