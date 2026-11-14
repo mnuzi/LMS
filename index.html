@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Library Management System 2026</title>
+</head>
+<body class="page-dashboard">
+
+    <!-- LEFT PART: Sidebar -->
+    <aside class="sidebar">
+        <div class="brand">
+            <img src="images/Library_Management_System.jpg" alt="Library Logo">
+            <strong>Library Management</strong>
+            <span>Est. 2026</span>
+        </div>
+
+        <nav>
+            <a class="nav-link" href="index.html">
+                Dashboard
+            </a>
+            <a class="nav-link" href="add_book.html">
+                Add Book
+            </a>
+            <a class=" nav-link " href="remove_book.html">
+                Remove Book
+            </a>
+            <a class="nav-link" href="view_borrowed.html">
+                View Borrowed Books
+            </a>
+            <a class="nav-link" href="view_available.html">
+                View Available Books
+            </a>
+            <a class="nav-link" href="manage_users.html">
+                Manage User Accounts
+            </a>
+            <a class="nav-link" href="search_books.html">
+                Search Books
+            </a>
+        </nav>
+    </aside>
+
+    <!-- RIGHT PART: Main content -->
+    <main class="main">
+
+        <!-- Top bar: greeting + search -->
+        <header class="topbar">
+            <div class="greeting">
+                <h1>Good morning, Librarian</h1>
+                <p class="subline">
+                    <span id="current-date"></span>
+                    <span class="sep">·</span>
+                    <span id="current-time"></span>
+                    <span class="sep">·</span>
+                    <span class="overdue"><span id="overdue-count">47</span> books are overdue</span>
+                </p>
+            </div>
+            <input class="search-box" type="search" placeholder="Find a book or member…">
+        </header>
+
+        <!-- Row 1: 4 stat boxes -->
+        <section class="stats-grid">
+            <div class="box stat-box">
+                <div class="stat-value"></div>
+                <div class="stat-label">Total books</div>
+            </div>
+            <div class="box stat-box">
+                <div class="stat-value"></div>
+                <div class="stat-label">Available</div>
+            </div>
+            <div class="box stat-box">
+                <div class="stat-value"></div>
+                <div class="stat-label">On loan</div>
+            </div>
+            <div class="box stat-box">
+                <div class="stat-value"></div>
+                <div class="stat-label">Members</div>
+            </div>
+        </section>
+
+        <!-- Row 2: New arrivals (full width) -->
+        <section class="box panel">
+            <h2>New arrivals</h2>
+            <div class="panel-body arrivals-row"></div>
+        </section>
+
+        <!-- Row 3: two boxes -->
+        <section class="bottom-grid">
+            <div class="box panel">
+                <h2>Recent circulation</h2>
+                <div class="panel-body"></div>
+            </div>
+            <div class="box panel">
+                <h2>Most loved this month</h2>
+                <div class="panel-body"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById("current-date").textContent =
+                now.toLocaleDateString("en-GB", {
+                    weekday: "long", day: "numeric", month: "long", year: "numeric"
+                });
+            document.getElementById("current-time").textContent =
+                now.toLocaleTimeString("en-US", {
+                    hour: "numeric", minute: "2-digit", second: "2-digit"
+                });
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+
+</body>
+</html>
