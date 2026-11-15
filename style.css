@@ -265,3 +265,29 @@ body {
 .btn:hover { background-color: var(--maroon-900); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .list-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* ---------- BOOK COVERS (coloured gradient grid like the prototype) ---------- */
+.book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+.book-card { display: flex; flex-direction: column; gap: 8px; }
+.book-card select, .book-card .btn { width: 100%; }
+.book-cover { height: 170px; padding: 12px; border-radius: 4px 8px 8px 4px; border-left: 6px solid rgba(0, 0, 0, 0.25); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); color: #fff; font-family: Georgia, serif; font-weight: bold; font-size: 15px; display: flex; flex-direction: column; justify-content: space-between; }
+.book-cover small { font-family: Arial, sans-serif; font-weight: normal; font-size: 11px; opacity: 0.85; }
+.arrivals-row .book-cover { flex: 0 0 110px; }
+.cover-0 { background: linear-gradient(160deg, #1e3a8a, #3b82f6); }
+.cover-1 { background: linear-gradient(160deg, #7b1f2e, #c0525f); }
+.cover-2 { background: linear-gradient(160deg, #0f766e, #34d399); }
+.cover-3 { background: linear-gradient(160deg, #b45309, #fbbf24); }
+.cover-4 { background: linear-gradient(160deg, #5b21b6, #a78bfa); }
+.cover-5 { background: linear-gradient(160deg, #0c4a6e, #38bdf8); }
+.cover-6 { background: linear-gradient(160deg, #3f6212, #a3e635); }
+.cover-7 { background: linear-gradient(160deg, #9d174d, #f472b6); }
+
+/* ---------- CIRCULATION LIST & STATUS LABELS (like the prototype) ---------- */
+.circ-row { display: grid; grid-template-columns: 1fr 1.2fr auto; gap: 10px; align-items: center; padding: 11px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
+.circ-row:first-child, .rank-row:first-child { border-top: 1px dashed var(--border); }
+.rank-row { display: flex; justify-content: space-between; gap: 10px; padding: 11px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
+.rank-row strong { color: var(--maroon); }
+.pill { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: bold; justify-self: start; }
+.pill-borrowed { background: #dbeafe; color: #1d4ed8; }
+.pill-returned { background: #dcfce7; color: #15803d; }
+.pill-overdue { background: #fee2e2; color: #b91c1c; }

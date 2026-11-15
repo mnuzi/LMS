@@ -68,7 +68,9 @@
         async function returnBook(id) {
             // clearing member_id makes the book available again
             const { error } = await db.from("books").update({ member_id: null, due_date: null }).eq("id", id);
-            if (error) alert(error.message);
+            if (error) { alert(error.message); return; }
+            // mark the open loan in the history table as returned
+            await db.from("loans").update({ returned_at: new Date().toISOString() }).eq("book_id", id).is("returned_at", null);
             loadBorrowed();
         }
         loadBorrowed();

@@ -45,7 +45,7 @@
     <!-- RIGHT PART: Main content -->
     <main class="main">
         <h1>Available Books</h1>
-        <div id="list"></div>
+        <div id="list" class="book-grid"></div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -60,10 +60,10 @@
             for (const m of members) options += `<option value="${m.id}">${safe(m.name)}</option>`;
             let html = "";
             for (const b of books) {
-                html += `<div class="box panel list-row" style="margin-bottom:12px">
-                    <span><strong>${safe(b.title)}</strong><br>${safe(b.author)}</span>
-                    <span><select class="search-box" id="m-${b.id}" style="width:200px">${options}</select>
-                    <button class="btn" onclick="borrowBook('${b.id}')">Borrow</button></span></div>`;
+                html += `<div class="book-card">
+                    <div class="book-cover ${coverClass(b.title)}">${safe(b.title)}<small>${safe(b.author)}</small></div>
+                    <select class="search-box" id="m-${b.id}">${options}</select>
+                    <button class="btn" onclick="borrowBook('${b.id}')">Borrow</button></div>`;
             }
             document.getElementById("list").innerHTML = html || "<p>No books are available.</p>";
         }
@@ -73,7 +73,10 @@
             // due in 14 days
             const due = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
             const { error } = await db.from("books").update({ member_id: memberId, due_date: due }).eq("id", id);
-            if (error) alert(error.message); else alert("Borrowed. Due on " + due);
+            if (error) { alert(error.message); return; }
+            // also save a row in the "loans" history table
+            await db.from("loans").insert({ book_id: id, member_id: memberId, due_date: due });
+            alert("Borrowed. Due on " + due);
             loadAvailable();
         }
         loadAvailable();

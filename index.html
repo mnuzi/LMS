@@ -93,10 +93,15 @@
                 <div class="panel-body" id="borrowed-list"></div>
             </div>
             <div class="box panel">
-                <h2>Overdue books</h2>
-                <div class="panel-body" id="overdue-list"></div>
+                <h2>Most loved this month</h2>
+                <div class="panel-body" id="loved-list"></div>
             </div>
-            
+        </section>
+
+        <!-- Row 4: overdue books (full width) -->
+        <section class="box panel">
+            <h2>Overdue books</h2>
+            <div class="panel-body" id="overdue-list" style="min-height: 0"></div>
         </section>
 
     </main>
@@ -122,6 +127,7 @@
     <script>
         async function loadDashboard() {
             const { data: books } = await db.from("books").select("*, members(name)").order("created_at", { ascending: false });
+            const { data: loans } = await db.from("loans").select("*, books(title), members(name)").order("borrowed_at", { ascending: false });
             const { count: memberCount } = await db.from("members").select("*", { count: "exact", head: true });
             const today = new Date().toISOString().slice(0, 10);
             const borrowed = books.filter(b => b.member_id);
@@ -136,12 +142,30 @@
 
             // newest 6 books
             document.getElementById("arrivals").innerHTML = books.slice(0, 6).map(b =>
-                `<div class="box panel" style="min-width:150px"><strong>${safe(b.title)}</strong><br>${safe(b.author)}</div>`).join("") || "<p>No books yet.</p>";
-            // currently borrowed books
-            document.getElementById("borrowed-list").innerHTML = borrowed.slice(0, 6).map(b =>
-                `<p>${safe(b.title)} - ${safe(b.members.name)} (due ${b.due_date})</p>`).join("") || "<p>No books on loan.</p>";
+                `<div class="book-cover ${coverClass(b.title)}">${safe(b.title)}<small>NEW</small></div>`).join("") || "<p>No books yet.</p>";
+            // Recent circulation: the 5 latest loans, each with a coloured status label
+            document.getElementById("borrowed-list").innerHTML = loans.slice(0, 5).map(l => {
+                let status = "Borrowed";
+                if (l.returned_at) status = "Returned";
+                else if (l.due_date < today) status = "Overdue";
+                return `<div class="circ-row"><strong>${safe(l.members.name)}</strong><span>${safe(l.books.title)}</span>
+                    <span class="pill pill-${status.toLowerCase()}">${status}</span></div>`;
+            }).join("") || "<p>No loans yet.</p>";
+
+            // Most loved: count loans per book in the last 30 days, show the top 5
+            const since = new Date(Date.now() - 30 * 86400000).toISOString();
+            const counts = {};
+            for (const l of loans) {
+                if (l.borrowed_at >= since) counts[l.books.title] = (counts[l.books.title] || 0) + 1;
+            }
+            const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            document.getElementById("loved-list").innerHTML = top.map(([title, n], i) =>
+                `<div class="rank-row"><span>${i + 1}. ${safe(title)}</span><strong>${n}</strong></div>`).join("") || "<p>No loans yet.</p>";
+
+            // Overdue books
             document.getElementById("overdue-list").innerHTML = overdue.map(b =>
-                `<p style="color:var(--danger)">${safe(b.title)}</p>`).join("") || "<p>Nothing overdue.</p>";
+                `<div class="circ-row"><strong>${safe(b.members.name)}</strong><span>${safe(b.title)}</span>
+                    <span class="pill pill-overdue">Due ${b.due_date}</span></div>`).join("") || "<p>Nothing overdue.</p>";
         }
         loadDashboard();
 
